@@ -19,15 +19,22 @@ void userhook_FastLoop()
 #ifdef USERHOOK_50HZLOOP
 void userhook_50Hz()
 {
-    // put your 50Hz code here
-    if (g.rc_7.radio_in < 1400) {
-    	//unsigned char i = 0x20 | ((unsigned char)((1500 - g.rc_7.radio_in) / 100) + 1);
-        hal.uartC->write((const uint8_t[]){0x81, 0x01, 0x04, 0x07, 0x24, 0xff}, 6);
-    } 
+	uint8_t packet[6];
+	packet[0] = 0x81;
+	packet[1] = 0x01;
+	packet[2] = 0x04;
+	packet[3] = 0x07; 
+	packet[4] = 0x00;
+	packet[5] = 0xff;
 
-    if (g.rc_7.radio_in > 1600) {
-    	//char i = (char)((g.rc_7.radio_in - 1500) / 100) + 1;
-    	hal.uartC->write((const uint8_t[]){0x81, 0x01, 0x04, 0x07, 0x34, 0xff}, 6);
+    if (g.rc_7.radio_in < 1400) {
+    	packet[4] = 0x20 | ((unsigned char)((1500 - g.rc_7.radio_in) / 100));
+        hal.uartC->write(packet, 6);
+    } else if (g.rc_7.radio_in > 1600) {    	
+    	packet[4] = 0x30 | ((unsigned char)((g.rc_7.radio_in - 1500) / 100));    	
+    	hal.uartC->write(packet, 6);
+    } else {
+    	hal.uartC->write(packet, 6);
     }
 }
 #endif
