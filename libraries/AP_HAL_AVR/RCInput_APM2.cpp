@@ -132,12 +132,19 @@ uint8_t APM2RCInput::read(uint16_t* periods, uint8_t len) {
      * constrain the pulse. */
     for (int i = 0; i < len; i++) {
         /* scale _pulse_capt from 0.5us units to 1us units. */
-        periods[i] = constrain_pulse(periods[i] >> 1);
-        /* check for override */
-        if (_override[i] != 0) {
-            periods[i] = _override[i];
+        periods[i] = constrain_pulse(periods[i] >> 1);        
+    }
+
+    // RC can disable overrides completely by setting 8th channel to maximum
+    if (periods[7] < 1900) {
+        for (int i = 0; i < len; i++) {
+            /* check for override */
+            if (_override[i] != 0) {
+                periods[i] = _override[i];
+            }
         }
     }
+
     return _num_channels;
 }
 
